@@ -12,6 +12,8 @@ import jwt from "jsonwebtoken"
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
 import cookieParser from "cookie-parser"
 import Stripe from "stripe"
+import path from "path"
+import { fileURLToPath } from "url"
 
 import productRouter from "./routes/product.js"
 import brandRouter from "./routes/brand.js"
@@ -25,6 +27,8 @@ import { cookieExtractor, isAuth, sanitizedUser } from "./middlewares/auth.js"
 
 const app = express()
 const port = process.env.PORT
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 connectDB()
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
@@ -62,7 +66,7 @@ app.post('/webhook', express.raw({type: 'application/json'}), (request, response
 
 // middlewares 
 // Initialize Passport and restore authentication state, if any, from the session
-app.use(express.static("build"))
+app.use(express.static(path.resolve(__dirname,"build")))
 app.use(cookieParser())
 app.use(session({
     secret: process.env.SESSION_SECRET_KEY || 'keyboard cat',
