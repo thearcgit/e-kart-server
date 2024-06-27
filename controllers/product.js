@@ -15,9 +15,13 @@ export const createProduct = async (req, res) => {
 }
 
 export const fetchAllProduct = async (req, res) => {
+    let isAdmin = {}
+    if(!req.query.admin){
+        isAdmin.deleted={$ne:true}
+    }
 
-    let query = Product.find({})
-    let queryCount = Product.find({})
+    let query = Product.find(isAdmin)
+    let queryCount = Product.find(isAdmin)
     if (req.query.category) {
         query = query.find({ category: req.query.category })
         queryCount = queryCount.find({ category: req.query.category })

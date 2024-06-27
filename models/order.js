@@ -19,7 +19,7 @@ const orderSchema = new mongoose.Schema({
         required: [true, 'Payment method is required'],
     },
     selectedAddress: {
-        type: [mongoose.Schema.Types.Mixed],
+        type: mongoose.Schema.Types.Mixed,
         required: [true, 'Shipping address is required'],
     },
     status: {

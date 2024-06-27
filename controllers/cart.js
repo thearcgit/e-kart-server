@@ -1,10 +1,11 @@
 import Cart from "../models/cart.js"
 
 export const addToCart = async (req, res) => {
+    const {id} = req.user
 
     try {
 
-        const cart = new Cart(req.body)
+        const cart = new Cart({...req.body,user:id})
         const docs = await cart.save()
         const result = await docs.populate("product")
         res.status(201).json(result)
@@ -17,10 +18,10 @@ export const addToCart = async (req, res) => {
 
 
 export const fetchCartByUser = async (req, res) => {
-    const { userId } = req.query
+    const { id } = req.user
 
     try {
-        const cartItems = await Cart.find({ user: userId }, "quantity user product").populate("user").populate("product").exec()
+        const cartItems = await Cart.find({ user: id }, "quantity user product").populate("user").populate("product").exec()
         res.status(200).json(cartItems)
     } catch (error) {
 
