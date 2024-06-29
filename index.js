@@ -112,7 +112,7 @@ passport.use('local', new LocalStrategy({
             const hashedPassword = await bcrypt.compare(password, user?.hashedPassword)
             const token = jwt.sign(sanitizedUser(user), process.env.JWT_SECRET_KEY || 'secret')
             if (hashedPassword) {
-                return done(null, sanitizedUser(user))
+                return done(null, {...sanitizedUser(user),token})
 
             } else {
                 return done(null, false, { message: "Invalid credentials." })
@@ -134,10 +134,12 @@ passport.use('jwt', new JwtStrategy(opts, async function (jwt_payload, done) {
         if (user) {
             return done(null, sanitizedUser(user));
         } else {
+            console.log('jwt elso',)
             return done(null, false);
             // or you could create a new account
-        }
-    } catch (error) {
+            }
+            } catch (error) {
+        console.log('jwt elso',error)
 
         return done(err, false);
     }
