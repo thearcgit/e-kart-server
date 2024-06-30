@@ -163,10 +163,11 @@ passport.deserializeUser(function (user, cb) {
 });
 app.post("/create-payment-intent", async (req, res) => {
     const { totalAmount,order } = req.body;
+    console.log('payment intent',totalAmount)
   
     // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: totalAmount,
+      amount: Math.round(totalAmount*100),
       description:"payment intent",
       shipping: {
         name: 'Jenny Rosen',
