@@ -165,7 +165,7 @@ passport.deserializeUser(function (user, cb) {
     });
 });
 app.post("/create-payment-intent", async (req, res) => {
-    const { totalAmount,order } = req.body;
+    const { totalAmount,orderId } = req.body;
     console.log('payment intent',totalAmount)
   
     // Create a PaymentIntent with the order amount and currency
@@ -188,7 +188,7 @@ app.post("/create-payment-intent", async (req, res) => {
         enabled: true,
       },
       metadata:{
-        order
+        orderId
       }
     });
   
