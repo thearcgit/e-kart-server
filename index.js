@@ -53,6 +53,7 @@ app.post('/webhook', express.raw({type: 'application/json'}), (request, response
             switch (event.type) {
                 case 'payment_intent.succeeded':
                     const paymentIntentSucceeded = event.data.object;
+                    console.log('payment intent succeed',paymentIntentSucceeded)
         // Then define and call a function to handle the event payment_intent.succeeded
         break;
       // ... handle other event types
