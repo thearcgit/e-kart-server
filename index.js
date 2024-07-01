@@ -94,6 +94,8 @@ app.use('/cart', isAuth(), cartRouter)
 app.use('/orders', isAuth(), orderRouter)
 
 
+app.get("*",(req,res) => res.sendFile(path.resolve(__dirname,"build","index.html")))
+
 
 // passport startegies ------------
 passport.use('local', new LocalStrategy({
