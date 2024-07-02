@@ -24,6 +24,7 @@ import cartRouter from "./routes/cart.js"
 import orderRouter from "./routes/order.js"
 import User from "./models/user.js"
 import { cookieExtractor, isAuth, sanitizedUser } from "./middlewares/auth.js"
+import Order from "./models/order.js"
 
 const app = express()
 const port = process.env.PORT
@@ -37,7 +38,7 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET_KEY || 'secret';
 
 //   webhook calling .........
-app.post('/webhook', express.raw({type: 'application/json'}), (request, response) => {
+app.post('/webhook', express.raw({type: 'application/json'}),async (request, response) => {
     const sig = request.headers['stripe-signature'];
     
     let event;
@@ -53,7 +54,10 @@ app.post('/webhook', express.raw({type: 'application/json'}), (request, response
             switch (event.type) {
                 case 'payment_intent.succeeded':
                     const paymentIntentSucceeded = event.data.object;
-                    console.log('payment intent succeed',paymentIntentSucceeded)
+                    console.log('payment intent succeeded',paymentIntentSucceeded)
+                    const order = await Order.findById(paymentIntentSucceeded.metadata.orderId)
+                    order.paymentStatus = "recieved"
+                    await order.save()
         // Then define and call a function to handle the event payment_intent.succeeded
         break;
       // ... handle other event types

@@ -30,6 +30,7 @@ export const loginUser = async (req, res) => {
         .json(sanitizedUser(req.user))
 }
 export const checkAuth = async (req, res) => {
+    console.log('session',req.session)
     if (req.user) res.status(200).json(sanitizedUser(req.user))
     else res.sendStatus(401)
 }

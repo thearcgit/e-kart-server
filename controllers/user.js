@@ -26,3 +26,19 @@ export const updateUser = async (req, res) => {
 
     }
 }
+
+
+export const signout = (req, res) => {
+    req.logout(function(err) {
+      if (err) { return next(err); }
+      req.session.destroy(err => {
+        if (err) {
+          return res.status(500).send('Failed to destroy session');
+        }
+        res.clearCookie('jwt'); 
+        res.clearCookie('connect.sid'); // Clear the session cookie
+        res.status(200).send('Logged out successfully');
+      });
+    });
+  };
+  

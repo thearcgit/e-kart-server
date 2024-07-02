@@ -1,5 +1,5 @@
 import express from 'express'
-import {  fetchUserById, updateUser } from '../controllers/user.js'
+import {  fetchUserById, signout, updateUser } from '../controllers/user.js'
 import { isAuth } from '../middlewares/auth.js'
 
 const router = express.Router()
@@ -7,5 +7,6 @@ const router = express.Router()
 
 router.get('/',fetchUserById)
 .patch('/',updateUser)
+.get('/signout',signout)
 
 export default router
