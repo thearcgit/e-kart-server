@@ -38,40 +38,42 @@ opts.jwtFromRequest = cookieExtractor;
 opts.secretOrKey = process.env.JWT_SECRET_KEY || 'secret';
 
 //   webhook calling .........
-app.post('/webhook', express.raw({type: 'application/json'}),async (request, response) => {
+app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     const sig = request.headers['stripe-signature'];
-    
+
     let event;
-    
+
     try {
         event = stripe.webhooks.constructEvent(request.body, sig, process.env.STRIPE_END_POINT);
+        console.log('webhook event',event)
         } catch (err) {
-            response.status(400).send(`Webhook Error: ${err.message}`);
-            return;
-            }
-            
-            // Handle the event
-            switch (event.type) {
-                case 'payment_intent.succeeded':
-                    const paymentIntentSucceeded = event.data.object;
-                    console.log('payment intent succeeded',paymentIntentSucceeded)
-                    const order = await Order.findById(paymentIntentSucceeded.metadata.orderId)
-                    order.paymentStatus = "recieved"
-                    await order.save()
-        // Then define and call a function to handle the event payment_intent.succeeded
-        break;
-      // ... handle other event types
-      default:
-        console.log(`Unhandled event type ${event.type}`);
+        console.log('webhook errrrrrrrr',err)
+        response.status(400).send(`Webhook Error: ${err.message}`);
+        return;
     }
-  
+
+    // Handle the event
+    switch (event.type) {
+        case 'payment_intent.succeeded':
+            const paymentIntentSucceeded = event.data.object;
+            console.log('payment intent succeeded', paymentIntentSucceeded)
+            const order = await Order.findById(paymentIntentSucceeded.metadata.orderId)
+            order.paymentStatus = "received"
+            await order.save()
+            // Then define and call a function to handle the event payment_intent.succeeded
+            break;
+        // ... handle other event types
+        default:
+            console.log(`Unhandled event type ${event.type}`);
+    }
+
     // Return a 200 response to acknowledge receipt of the event
     response.send();
-  });
+});
 
 // middlewares 
 // Initialize Passport and restore authentication state, if any, from the session
-app.use(express.static(path.resolve(__dirname,"build")))
+app.use(express.static(path.resolve(__dirname, "build")))
 app.use(cookieParser())
 app.use(session({
     secret: process.env.SESSION_SECRET_KEY || 'keyboard cat',
@@ -99,7 +101,7 @@ app.use('/cart', isAuth(), cartRouter)
 app.use('/orders', isAuth(), orderRouter)
 
 
-app.get("*",(req,res) => res.sendFile(path.resolve(__dirname,"build","index.html")))
+app.get("*", (req, res) => res.sendFile(path.resolve(__dirname, "build", "index.html")))
 
 
 // passport startegies ------------
@@ -119,7 +121,7 @@ passport.use('local', new LocalStrategy({
             const hashedPassword = await bcrypt.compare(password, user?.hashedPassword)
             const token = jwt.sign(sanitizedUser(user), process.env.JWT_SECRET_KEY || 'secret')
             if (hashedPassword) {
-                return done(null, {...sanitizedUser(user),token})
+                return done(null, { ...sanitizedUser(user), token })
 
             } else {
                 return done(null, false, { message: "Invalid credentials." })
@@ -144,9 +146,9 @@ passport.use('jwt', new JwtStrategy(opts, async function (jwt_payload, done) {
             console.log('jwt elso',)
             return done(null, false);
             // or you could create a new account
-            }
-            } catch (error) {
-        console.log('jwt elso',error)
+        }
+    } catch (error) {
+        console.log('jwt elso', error)
 
         return done(err, false);
     }
@@ -169,37 +171,37 @@ passport.deserializeUser(function (user, cb) {
     });
 });
 app.post("/create-payment-intent", async (req, res) => {
-    const { totalAmount,orderId } = req.body;
-    console.log('payment intent',totalAmount)
-  
+    const { totalAmount, orderId } = req.body;
+    console.log('payment intent', totalAmount)
+
     // Create a PaymentIntent with the order amount and currency
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(totalAmount*100),
-      description:"payment intent",
-      shipping: {
-        name: 'Jenny Rosen',
-        address: {
-          line1: '510 Townsend St',
-          postal_code: '98140',
-          city: 'San Francisco',
-          state: 'CA',
-          country: 'US',
+        amount: Math.round(totalAmount * 100),
+        description: "payment intent",
+        shipping: {
+            name: 'Jenny Rosen',
+            address: {
+                line1: '510 Townsend St',
+                postal_code: '98140',
+                city: 'San Francisco',
+                state: 'CA',
+                country: 'US',
+            },
         },
-      },
-      currency: "inr",
-      // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
-      automatic_payment_methods: {
-        enabled: true,
-      },
-      metadata:{
-        orderId
-      }
+        currency: "inr",
+        // In the latest version of the API, specifying the `automatic_payment_methods` parameter is optional because Stripe enables its functionality by default.
+        automatic_payment_methods: {
+            enabled: true,
+        },
+        metadata: {
+            orderId
+        }
     });
-  
+
     res.send({
-      clientSecret: paymentIntent.client_secret,
+        clientSecret: paymentIntent.client_secret,
     });
-  });
+});
 
 
 
